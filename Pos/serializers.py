@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 
@@ -54,7 +55,6 @@ class ProductProSerializer(serializers.ModelSerializer):
         
  
 class ProductAndDetailsSerializer(serializers.ModelSerializer):
-    # prod = ProductProSerializer(many=True)
     prod = serializers.SerializerMethodField()
     class Meta:
         model = Product
@@ -252,13 +252,47 @@ class StockPropUpdateSerializer(serializers.ModelSerializer):
         model = StockProperty
         fields = '__all__'
         
-        
-        
+
+#    class ProductAndDetailsSerializer(serializers.ModelSerializer):
+#     prod = serializers.SerializerMethodField()
+#     class Meta:
+#         model = Product
+#         fields = '__all__'
+               
+    
+#     def get_prod(self, obj):
+#         # Get all related ProductPro instances or return an empty list if none exist
+#         product_pros = obj.prod.all()  # This uses the related_name defined in ProductPro
+#         return ProductProSerializer(product_pros, many=True).data
+     
+
+class TaskManagementSerializers(serializers.ModelSerializer):
+    # project = ProjectSerializer()
+    # assigned_to = EmployeeSerializer()
+    class Meta:
+        model = Task
+        fields = '__all__'       
+
+class AdvancesSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Advances
+        fields = '__all__'     
         
 class EmployeeSerializer(serializers.ModelSerializer):
+    tasks = serializers.SerializerMethodField()
+    advances = serializers.SerializerMethodField()
     class Meta:
         model = Employees
         fields = '__all__'
+
+
+    def get_tasks(self, obj):
+        tasks = obj.tasks.all()
+        return TaskManagementSerializers(tasks, many = True).data
+    
+    def get_advances(self, obj):
+        advances = obj.advances.all()
+        return AdvancesSerializers(advances, many = True).data
         
         
 
@@ -276,7 +310,7 @@ class StockPropertySerializer(serializers.ModelSerializer):
         
 
 class ExpensesSerializer(serializers.ModelSerializer):
-    employee = EmployeeSerializer(read_only=True)
+    employee = EmployeeSerializer()
     class Meta:
         model = Expenses
         fields = '__all__'
@@ -292,6 +326,18 @@ class AddExpensesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         expense = Expenses.objects.create(**validated_data)
         return expense
+        
+        
+        
+class AddAdvancesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Advances
+        fields = '__all__'
+        
+        
+    def create(self, validated_data):
+        advances = Advances.objects.create(**validated_data)
+        return advances
         
         
 
@@ -327,12 +373,15 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
         
-        
+class updateTaskSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Task
+        fields = '__all__'
+
 
 class CartCreateSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()
    
-
     class Meta:
         model = Cart
         fields = '__all__'
@@ -502,3 +551,70 @@ class SalesAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalesAnalytics
         fields = '__all__'
+
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectName
+        fields = '__all__'
+
+
+class CreateProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectName
+        fields = '__all__'
+
+    def create(self, validated_data):
+        # Create the ProjectName instance
+
+        material = validated_data['material_to_use']
+        material_size_required = validated_data['material_size']
+
+        # Check if enough material is available
+        if material.total < material_size_required:
+            raise ValidationError("Not enough material available in stock.")
+
+        # Reduce the material's size
+        material.total -= material_size_required
+        material.save()  # Save updated material size in StockProperty
+
+
+        project = ProjectName.objects.create(**validated_data)
+        return project
+    
+
+class CreateTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+    def create(self, validated_data):
+        # Create the ProjectName instance
+        task = Task.objects.create(**validated_data)
+        return task
+    
+    
+class TaskManagementSerializer(serializers.ModelSerializer):
+    project = ProjectSerializer()
+    assigned_to = EmployeeSerializer()
+    class Meta:
+        model = Task
+        fields = '__all__'
+        
+
+
+    
+
+class ProjectNameSerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+    class Meta:
+        model = ProjectName
+        fields = '__all__'
+
+        extra_fields = ['task_count']
+
+    def get_task_count(self, obj):
+        return Task.objects.filter(project=obj).count()
+    
+

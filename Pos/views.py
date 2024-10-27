@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.db.models import Sum
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
+from rest_framework.views import APIView
 
 
 
@@ -97,7 +98,26 @@ def all_material(request):
     serialize = MaterialSerializer(material, many=True)
     return Response(serialize.data)
 
+class CreateProjectView(APIView):
+    def post(self, request, *args, **kwargs):
+        print('This is the data ', request.data)
+        serializer = CreateProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()  # This calls the create method of the serializer
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print('This is the error ', serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class CreateTaskView(APIView):
+    def post(self, request, *args, **kwargs):
+        print('This is the data ', request.data)
+        serializer = CreateTaskSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()  # This calls the create method of the serializer
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print('This is the error ', serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST', 'GET'])
@@ -112,6 +132,25 @@ def all_productsize(request):
 def all_emplyees(request):
     employee = Employees.objects.all()
     serialize = EmployeeSerializer(employee, many=True)
+    return Response(serialize.data)
+
+
+@api_view(['PUT'])
+def update_task(request, pk):
+    print('Updates ', request.data)
+    task = Task.objects.get(pk=pk)
+    serializer = updateTaskSerializer(task, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        print('serializer data ', serializer.data)
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['POST', 'GET'])
+def single_emplyee(request, pk):
+    employee = Employees.objects.get(pk=pk)
+    serialize = EmployeeSerializer(employee)
     return Response(serialize.data)
 
 
@@ -166,6 +205,19 @@ def create_or_update_expenses(request):
 
 
 
+@api_view(['POST'])
+def create_advances(request):
+    serializer = AddAdvancesSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        print('advance ', serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 
@@ -196,16 +248,13 @@ def create_or_update_expenses(request):
 #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 def create_or_update_cart(request):
-    print('this is the request data ', request.data)
     cart_data = request.data
     product_id = cart_data['product']
     cart_quantity = int(cart_data['quantity'])
     
-    print('Product id is: ', product_id)
     
     product = ProductPro.objects.get(id=product_id)
     product_quantity = int(product.quantity)
-    print('This product is ', product.quantity)
     
     if cart_quantity >= 0:
         if cart_quantity <= product_quantity:
@@ -215,12 +264,13 @@ def create_or_update_cart(request):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            print('this is the error ', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Cart quantity exceeds product quantity.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({'error': 'Invalid cart quantity.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(['POST'])
 def add_deposit(request, pk):
@@ -651,3 +701,22 @@ def delete_productpro(request, pk):
     
     productpro.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+class TaskManagement(APIView):
+    def get(self, request):
+        data = Task.objects.order_by('-date_created')
+        serialize = TaskManagementSerializer(data, many=True)
+
+        return Response(serialize.data)
+    
+
+class ProjectManagement(APIView):
+    def get(self, request):
+        data = ProjectName.objects.order_by('-date_created')
+        serialize = ProjectNameSerializer(data, many=True)
+        return Response(serialize.data)

@@ -118,6 +118,16 @@ class Deposits(models.Model):
         return f'{self.cart.customer} deposited {self.amount} on {self.date}'
 
     
+class Advances(models.Model):
+    employee = models.ForeignKey(Employees, on_delete=models.CASCADE, related_name='advances')
+    amount = models.IntegerField()
+    date_issued = models.DateTimeField()
+    date_given = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.employee.first_name}'
+    
+    
 class Expenses(models.Model):
     employee = models.ForeignKey(Employees, on_delete=models.CASCADE)
     expence_name = models.CharField(max_length=200)
@@ -129,10 +139,39 @@ class Expenses(models.Model):
     def __str__(self):
         return f'{self.employee.first_name} {self.expence_name}'
     
+
+class ProjectName(models.Model):
+    name = models.CharField(max_length=1000)
+    material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
+    material_size = models.DecimalField(decimal_places=2, max_digits=10)
+    product = models.CharField(max_length=200)
+    product_size = models.DecimalField(decimal_places=2, max_digits=10)
+    date_created = models.DateTimeField(auto_now_add=True)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+
+
+class Task(models.Model):
+    project = models.ForeignKey(ProjectName, on_delete=models.CASCADE)
+    task_name = models.TextField()
+    estimated_pay = models.DecimalField(decimal_places=2, max_digits=10)
+    levels = models.IntegerField(blank=True, null=True)
+    start_date = models.DateTimeField()
+    due_date_time = models.DateTimeField()
+    completed = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    assigned_to = models.ForeignKey(Employees, on_delete=models.CASCADE, null=True, blank=True, related_name='tasks')
+
+
+    def __str__(self):
+        return self.project.name
     
-    
+
     
 class WorkInProgress(models.Model):
+    # task = models.ForeignKey(Task, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employees, on_delete=models.CASCADE)
     stock = models.ForeignKey(StockProperty,on_delete=models.CASCADE)
     product_name = models.CharField(max_length=200, null=True, blank=True)

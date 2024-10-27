@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-&jr1oxzjxdmaqg$eoxc68o#y_1e!e95xp)vc!qryd1cf%+io%9
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'joyce2.pythonanywhere.com'
+    'joyce2.pythonanywhere.com',
+    '127.0.0.1'
 ]
 
 
@@ -146,8 +147,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:1212",
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://clothing-beige-theta.vercel.app"
-
+    "https://clothing-beige-theta.vercel.app",
+    
 ]
 
 
