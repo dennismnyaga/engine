@@ -618,3 +618,7 @@ class ProjectNameSerializer(serializers.ModelSerializer):
         return Task.objects.filter(project=obj).count()
     
 
+class AdvancesUpdatesSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Advances
+        fields = '__all__'

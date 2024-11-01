@@ -218,34 +218,6 @@ def create_advances(request):
 
 
 
-
-
-
-# @api_view(['POST'])
-# def create_or_update_cart(request):
-#     print('this is the request data ', request.data)
-#     cart_data = request.data
-#     product_id = cart_data['product']
-#     cart_quantity = cart_data['quantity']
-    
-#     print('Product id is: ', product_id)
-    
-#     product = ProductPro.objects.get(id=product_id)
-#     product_quantity = product.quantity
-#     print('This product is ', product.quantity)
-    
-#     if cart_quantity >= 0:
-#         if cart_quantity <= product_quantity:
-#             remaining_product_quantity = product_quantity - cart_quantity
-#             ProductPro.objects.filter(id=product_id).update(quantity=remaining_product_quantity)
-            
-#     print('Remaining product quantity ', remaining_product_quantity)
-#     serializer = CartCreateSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-#     print('this is the error ', serializer.errors)
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 def create_or_update_cart(request):
     cart_data = request.data
@@ -327,6 +299,7 @@ def update_cart(request, pk):
     return Response(serializer.errors, status=400)
 
 
+
 @api_view(['DELETE']) 
 def deleteCart(request ,pk):
     print('Cart id is ', pk)
@@ -376,6 +349,7 @@ def update_work(request, pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
 
 
+
 @api_view(['PUT'])
 def reset_expense(request, pk):
     try:
@@ -389,7 +363,8 @@ def reset_expense(request, pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
     
-    
+
+
 @api_view(['POST'])
 def create_product(request):
     serializer = CreateProductSerializer(data=request.data)
@@ -400,7 +375,8 @@ def create_product(request):
     print('this is the error ', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
+
+
 @api_view(['POST'])
 def add_product(request):
     serializer = AddProductSerializer(data=request.data)
@@ -411,6 +387,8 @@ def add_product(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     print('this is the error ', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(['POST'])
 def add_product_pro(request):
@@ -424,6 +402,7 @@ def add_product_pro(request):
     print('this is the error ', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
 
 @api_view(['POST'])
 def create_progress(request):
@@ -485,6 +464,7 @@ def create_stock(request):
     print('This is the error ', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
     
     
 @api_view(['POST'])
@@ -720,3 +700,47 @@ class ProjectManagement(APIView):
         data = ProjectName.objects.order_by('-date_created')
         serialize = ProjectNameSerializer(data, many=True)
         return Response(serialize.data)
+    
+
+
+class updateAdvances(APIView):
+    def put(self, request, pk):
+        try:
+            advance = Advances.objects.get(pk=pk)
+        except Advances.DoesNotExist:
+            return Response({"error": "Advance not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Deserialize and validate the incoming data
+        serializer = AdvancesUpdatesSerilizer(advance, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()  # Save the updated instance if valid
+            print('data ', serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        # Return validation errors if data is invalid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['DELETE'])
+def delete_advance(request, pk):
+    try:
+        advance = Advances.objects.get(pk=pk)
+    except Advances.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    advance.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+# @api_view(['DELETE'])
+# def delete_employee(request, pk):
+#     print('employee ', request.data)
+#     try:
+#         employee = Employees.objects.get(pk=pk)
+#         print('Employee found ', employee)
+#     except Employees.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+#     employee.delete()
+#     return Response(status=status.HTTP_204_NO_CONTENT)

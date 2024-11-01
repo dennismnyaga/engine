@@ -55,5 +55,7 @@ urlpatterns = [
     path('create-project/', views.CreateProjectView.as_view(), name='create-project'),
     path('create-task/', views.CreateTaskView.as_view(), name='create-task'),
     path('mark-complete/<str:pk>/', views.update_task, name='mark-complete'),
-    path('addAdvance/', views.create_advances, name='add-advances')
+    path('addAdvance/', views.create_advances, name='add-advances'),
+    path('updateAdvances/<str:pk>/', views.updateAdvances.as_view()),
+    path('deleteadvance/<str:pk>/', views.delete_advance, name='delete-advance')
 ]

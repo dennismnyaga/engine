@@ -67,6 +67,7 @@ class ProductPro(models.Model):
         return self.product.name
     
 class Employees(models.Model):
+    id_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     email = models.EmailField(blank=True, null=True)
