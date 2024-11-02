@@ -733,6 +733,17 @@ def delete_advance(request, pk):
     advance.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+@api_view(['DELETE'])
+def delete_task(request, pk):
+    try:
+        task = Task.objects.get(pk=pk)
+    except Task.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    task.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
 # @api_view(['DELETE'])
 # def delete_employee(request, pk):
 #     print('employee ', request.data)

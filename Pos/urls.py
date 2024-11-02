@@ -57,5 +57,7 @@ urlpatterns = [
     path('mark-complete/<str:pk>/', views.update_task, name='mark-complete'),
     path('addAdvance/', views.create_advances, name='add-advances'),
     path('updateAdvances/<str:pk>/', views.updateAdvances.as_view()),
-    path('deleteadvance/<str:pk>/', views.delete_advance, name='delete-advance')
+    path('deleteadvance/<str:pk>/', views.delete_advance, name='delete-advance'),
+    path('deletetask/<str:pk>/', views.delete_task, name='delete-task'),
+    # path('update-task/<str:pk>/', views.update_task, name='update-task'),
 ]
