@@ -109,6 +109,13 @@ class CreateProjectView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class GetAllProjects(APIView):
+    def get(self, request):
+        project = ProjectName.objects.all()
+        serialize = ProjectSerializer(project, many=True)
+        return Response(serialize.data, status=status.HTTP_200_OK)
+        # ProjectName
+
 class CreateTaskView(APIView):
     def post(self, request, *args, **kwargs):
         print('This is the data ', request.data)
@@ -755,3 +762,28 @@ def delete_task(request, pk):
     
 #     employee.delete()
 #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+class task_completion(APIView):
+    def put(self, request, pk):
+        try:
+            task = Task.objects.get(pk=pk)
+        except Task.DoesNotExist:
+            return Response({"error": "Advance not found."}, status=status.HTTP_404_NOT_FOUND)
+        task_completed = request.data.get("task_completed")
+
+
+        task_completed = request.data.get("task_completed")
+
+        # Validate that task_completed is provided and is a valid integer
+        if task_completed is None or not isinstance(task_completed, int) or task_completed < 0:
+            return Response({"error": "Invalid value for task_completed."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the task fields
+        task.task_completed = task_completed
+        task.completed = task.task_completed >= task.quantity  # Mark as complete if `task_completed` >= `quantity`
+        task.save()
+
+        # Serialize the updated task and return it
+        serializer = TaskSerializer(task)
+        print('data ', serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -559,28 +559,46 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = ProjectName
         fields = '__all__'
 
+class ProjectMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectMaterial
+        fields = ['material_to_use', 'material_size']
+
 
 class CreateProjectSerializer(serializers.ModelSerializer):
+    materials = ProjectMaterialSerializer(many=True)
     class Meta:
         model = ProjectName
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['name', 'product', 'product_size', 'quantity', 'materials']
 
     def create(self, validated_data):
+        # Extract materials data from validated data
+        materials_data = validated_data.pop('materials', [])
+
         # Create the ProjectName instance
-
-        material = validated_data['material_to_use']
-        material_size_required = validated_data['material_size']
-
-        # Check if enough material is available
-        if material.total < material_size_required:
-            raise ValidationError("Not enough material available in stock.")
-
-        # Reduce the material's size
-        material.total -= material_size_required
-        material.save()  # Save updated material size in StockProperty
-
-
         project = ProjectName.objects.create(**validated_data)
+
+        # Process each material entry
+        for material_data in materials_data:
+            material = material_data['material_to_use']
+            material_size_required = material_data['material_size']
+
+            # Check if enough material is available
+            if material.total < material_size_required:
+                raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
+
+            # Deduct the material size from StockProperty
+            material.total -= material_size_required
+            material.save()
+
+            # Create a ProjectMaterial instance for this material
+            ProjectMaterial.objects.create(
+                project=project,
+                material_to_use=material,
+                material_size=material_size_required
+            )
+
         return project
     
 
@@ -622,3 +640,11 @@ class AdvancesUpdatesSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Advances
         fields = '__all__'
+
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = '__all__'
+        read_only_fields = ['completed'] 

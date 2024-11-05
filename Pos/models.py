@@ -143,8 +143,8 @@ class Expenses(models.Model):
 
 class ProjectName(models.Model):
     name = models.CharField(max_length=1000)
-    material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
-    material_size = models.DecimalField(decimal_places=2, max_digits=10)
+    # material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
+    # material_size = models.DecimalField(decimal_places=2, max_digits=10)
     product = models.CharField(max_length=200)
     product_size = models.DecimalField(decimal_places=2, max_digits=10)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -154,11 +154,21 @@ class ProjectName(models.Model):
         return self.name
 
 
+class ProjectMaterial(models.Model):
+    project = models.ForeignKey(ProjectName, on_delete=models.CASCADE, related_name="materials")
+    material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
+    material_size = models.DecimalField(decimal_places=2, max_digits=10)
+
+    def __str__(self):
+        return f"{self.project.name} - {self.material_to_use.material}"
+    
+
 class Task(models.Model):
     project = models.ForeignKey(ProjectName, on_delete=models.CASCADE)
     task_name = models.TextField()
     estimated_pay = models.DecimalField(decimal_places=2, max_digits=10)
-    levels = models.IntegerField(blank=True, null=True)
+    quantity = models.IntegerField()
+    task_completed = models.IntegerField(default=0)
     start_date = models.DateTimeField()
     due_date_time = models.DateTimeField()
     completed = models.BooleanField(default=False)
@@ -266,3 +276,6 @@ class SalesAnalytics(models.Model):
 def update_sales_analytics(sender, instance, created, **kwargs):
     if instance.fully_payed:  # Only update analytics for fully paid sales (cash sales)
         SalesAnalytics.update_monthly_sales()
+
+
+
