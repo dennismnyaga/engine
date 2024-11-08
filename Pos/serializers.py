@@ -16,6 +16,8 @@ class MaterialSerializer(serializers.ModelSerializer):
         model = Material
         fields = '__all__'
 
+
+
 class MaterialSizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
@@ -27,6 +29,8 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         
+
+
 class ProductSizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
@@ -43,6 +47,7 @@ class ProductPropSerializer(serializers.ModelSerializer):
         model = ProductPro
         fields = '__all__'
     
+  
     
 class ProductProSerializer(serializers.ModelSerializer):
     material = MaterialSerializer()
@@ -210,27 +215,8 @@ class AllStockSerializer(serializers.ModelSerializer):
                 color, _ = Color.objects.get_or_create(name=color_name)
             instance.color = color
 
-        # Handle nested 'size' update
-        # size_data = validated_data.pop('size', None)
-        # if size_data:
-        #     size_id = size_data.get('id', None)
-        #     size_value = size_data.get('size', '').strip()
-        #     if size_id:
-        #         size = ProductSize.objects.get(pk=size_id)
-        #     elif size_value:
-        #         size, _ = ProductSize.objects.get_or_create(size=size_value)
-        #     instance.size = size
-
-
-
-        # # Increment the quantity
-        # new_quantity = validated_data.get('quantity', None)
-        # if new_quantity is not None:
-        #     instance.quantity += new_quantity  # Increment the quantity
-
-        # Update remaining fields (if any)
+        
         for attr, value in validated_data.items():
-            # if attr != 'quantity':  # Skip the quantity as it's already handled
             setattr(instance, attr, value)
        
 
@@ -251,20 +237,7 @@ class StockPropUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockProperty
         fields = '__all__'
-        
-
-#    class ProductAndDetailsSerializer(serializers.ModelSerializer):
-#     prod = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Product
-#         fields = '__all__'
-               
-    
-#     def get_prod(self, obj):
-#         # Get all related ProductPro instances or return an empty list if none exist
-#         product_pros = obj.prod.all()  # This uses the related_name defined in ProductPro
-#         return ProductProSerializer(product_pros, many=True).data
-     
+            
 
 class TaskManagementSerializers(serializers.ModelSerializer):
     # project = ProjectSerializer()
@@ -273,11 +246,13 @@ class TaskManagementSerializers(serializers.ModelSerializer):
         model = Task
         fields = '__all__'       
 
+
 class AdvancesSerializers(serializers.ModelSerializer):
     class Meta:
         model = Advances
         fields = '__all__'     
         
+
 class EmployeeSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
     advances = serializers.SerializerMethodField()
@@ -293,9 +268,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def get_advances(self, obj):
         advances = obj.advances.all()
         return AdvancesSerializers(advances, many = True).data
-        
-        
-
         
         
 
@@ -349,8 +321,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
         
-        
-        
   
         
 
@@ -388,8 +358,12 @@ class CartCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         customer_data = validated_data.pop('customer')
-        print("this is the validated data ", validated_data)
-        customer, created = Customer.objects.get_or_create(**customer_data)
+        
+        customer_phone = customer_data['phone']
+        if Customer.objects.get(phone=customer_phone):
+            customer = Customer.objects.get(phone=customer_phone)
+        else:
+            customer, created = Customer.objects.get_or_create(**customer_data)
         cart = Cart.objects.create(customer=customer, **validated_data)
         return cart
     
@@ -444,6 +418,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
             material=material,
             **validated_data
         )
+
         return productpro
     
     
@@ -480,13 +455,11 @@ class CreateEmployeeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         employee = Employees.objects.create(**validated_data)
         return employee
-    
-    
+        
     
     
     
 class CreateProgressSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = WorkInProgress
         fields = '__all__'
@@ -494,7 +467,6 @@ class CreateProgressSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         workInprogress = WorkInProgress.objects.create(**validated_data)
         return workInprogress
-    
     
     
     
@@ -559,27 +531,77 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = ProjectName
         fields = '__all__'
 
-class ProjectMaterialSerializer(serializers.ModelSerializer):
+
+
+class TaskMaterialSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProjectMaterial
+        model = TaskMaterial
         fields = ['material_to_use', 'material_size']
 
 
 class CreateProjectSerializer(serializers.ModelSerializer):
-    materials = ProjectMaterialSerializer(many=True)
     class Meta:
         model = ProjectName
-        # fields = '__all__'
-        fields = ['name', 'product', 'product_size', 'quantity', 'materials']
+        fields = '__all__'
+        # fields = ['name', 'product', 'product_size', 'quantity', 'materials']
 
     def create(self, validated_data):
         # Extract materials data from validated data
-        materials_data = validated_data.pop('materials', [])
+        # materials_data = validated_data.pop('materials', [])
 
         # Create the ProjectName instance
         project = ProjectName.objects.create(**validated_data)
 
         # Process each material entry
+        # for material_data in materials_data:
+        #     material = material_data['material_to_use']
+        #     material_size_required = material_data['material_size']
+
+        #     # Check if enough material is available
+        #     if material.total < material_size_required:
+        #         raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
+
+        #     # Deduct the material size from StockProperty
+        #     material.total -= material_size_required
+        #     material.save()
+
+        #     # Create a ProjectMaterial instance for this material
+        #     ProjectMaterial.objects.create(
+        #         project=project,
+        #         material_to_use=material,
+        #         material_size=material_size_required
+        #     )
+
+        return project
+    
+
+class CreateTaskSerializer(serializers.ModelSerializer):
+    materials = TaskMaterialSerializer(many=True)
+
+    class Meta:
+        model = Task
+        # fields = '__all__'
+        fields = [
+            'project',
+            'task_name', 
+            'estimated_pay',
+            'quantity',
+            'task_completed',
+            'start_date',
+            'due_date_time',
+            'completed',
+            'date_created',
+            'assigned_to',
+            'materials'
+    ]
+
+    def create(self, validated_data):
+        materials_data = validated_data.pop('materials', [])
+
+        # Create the ProjectName instance
+        task = Task.objects.create(**validated_data)
+
+         # Process each material entry
         for material_data in materials_data:
             material = material_data['material_to_use']
             material_size_required = material_data['material_size']
@@ -593,23 +615,12 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             material.save()
 
             # Create a ProjectMaterial instance for this material
-            ProjectMaterial.objects.create(
-                project=project,
+            TaskMaterial.objects.create(
+                task=task,
                 material_to_use=material,
                 material_size=material_size_required
-            )
-
-        return project
-    
-
-class CreateTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = '__all__'
-
-    def create(self, validated_data):
-        # Create the ProjectName instance
-        task = Task.objects.create(**validated_data)
+                )
+            
         return task
     
     
@@ -635,6 +646,7 @@ class ProjectNameSerializer(serializers.ModelSerializer):
     def get_task_count(self, obj):
         return Task.objects.filter(project=obj).count()
     
+
 
 class AdvancesUpdatesSerilizer(serializers.ModelSerializer):
     class Meta:

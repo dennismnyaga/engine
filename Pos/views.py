@@ -122,6 +122,7 @@ class CreateTaskView(APIView):
         serializer = CreateTaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()  # This calls the create method of the serializer
+            print('later data ', serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         print('This is the error ', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -242,6 +243,7 @@ def create_or_update_cart(request):
             serializer = CartCreateSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                print('response data is ', serializer.data)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -460,7 +462,7 @@ def create_stock(request):
     role_size = the_data['size']
     
     
-    total = int(num_rolls) * int(role_size)
+    total = int(num_rolls) * float(role_size)
     request.data['total'] = total
     
     serializer = CreateStockSerializer(data=request.data)
@@ -626,7 +628,8 @@ def update_all_stock(request, pk):
         stocks = StockProperty.objects.get(pk=pk)        
     except stocks.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-  
+    
+    print('new data ', request.data)
     serializer = AllStockSerializer(stocks, data=request.data, partial=True)
     
     if serializer.is_valid():
@@ -635,7 +638,7 @@ def update_all_stock(request, pk):
         # Re-fetch the updated object to return full material, color, size details
         stocks.refresh_from_db()  # Refresh the instance with the latest data
         updated_serializer = AllStockSerializer(stocks)  # Use the serializer to serialize the updated object
-        
+        print('updated stock ', updated_serializer.data)
         return Response(updated_serializer.data, status=status.HTTP_200_OK)
     # print('Updated data ', updated_serializer.data)
     print('Error is ', serializer.errors)

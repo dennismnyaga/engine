@@ -38,7 +38,7 @@ class StockProperty(models.Model):
     
     
 class ProductSize(models.Model):
-    size = models.CharField(max_length=20)
+    size = models.DecimalField(max_digits=50, decimal_places=2)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -84,7 +84,7 @@ class Employees(models.Model):
     
 class Customer(models.Model):
     name = models.CharField(max_length=200)
-    phone = models.IntegerField(unique=True)
+    phone = models.IntegerField()
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -110,6 +110,10 @@ class Cart(models.Model):
     def __str__(self):
         return f'{self.customer.name} bought {self.product.product.name}'
    
+
+# class Sales(models.Model)
+
+
 class Deposits(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
@@ -154,14 +158,7 @@ class ProjectName(models.Model):
         return self.name
 
 
-class ProjectMaterial(models.Model):
-    project = models.ForeignKey(ProjectName, on_delete=models.CASCADE, related_name="materials")
-    material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
-    material_size = models.DecimalField(decimal_places=2, max_digits=10)
 
-    def __str__(self):
-        return f"{self.project.name} - {self.material_to_use.material}"
-    
 
 class Task(models.Model):
     project = models.ForeignKey(ProjectName, on_delete=models.CASCADE)
@@ -178,6 +175,16 @@ class Task(models.Model):
 
     def __str__(self):
         return self.project.name
+    
+
+class TaskMaterial(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="materials")
+    # project = models.ForeignKey(ProjectName, on_delete=models.CASCADE, related_name="materials")
+    material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
+    material_size = models.DecimalField(decimal_places=2, max_digits=10)
+
+    def __str__(self):
+        return f"{self.task.task_name} - {self.material_to_use.material}"
     
 
     
