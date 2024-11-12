@@ -62,11 +62,30 @@ def all_products(request):
 
 
 
+# @api_view(['POST', 'GET'])
+# def all_prods(request):
+#     product = Product.objects.order_by('-date_added')
+#     serialize = ProductAndDetailsSerializer(product, many=True)
+#     return Response(serialize.data)
 @api_view(['POST', 'GET'])
 def all_prods(request):
-    product = Product.objects.order_by('-date_added')
-    serialize = ProductAndDetailsSerializer(product, many=True)
-    return Response(serialize.data)
+    try:
+        # Fetching products and ordering them by 'date_added'
+        product = Product.objects.order_by('-date_added')
+        serialize = ProductAndDetailsSerializer(product, many=True)
+
+        # Return successful response with a status code of 200 (OK)
+        return Response(serialize.data, status=status.HTTP_200_OK)
+    
+    except Product.DoesNotExist:
+        # Return a 404 response if no products are found
+        return Response({"error": "Products not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as e:
+        # Catch any other exceptions and return a 500 (Internal Server Error)
+        print('eeror is ', str(e))
+        return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 @api_view(['GET'])
 def check_product_exists(request):

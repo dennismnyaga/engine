@@ -71,6 +71,7 @@ class ProductAndDetailsSerializer(serializers.ModelSerializer):
         product_pros = obj.prod.all()  # This uses the related_name defined in ProductPro
         return ProductProSerializer(product_pros, many=True).data
 
+
 class ProductPropUpdateSerializer(serializers.ModelSerializer):
     material = MaterialSerializer()
     color = ColorSerializer()
@@ -312,11 +313,17 @@ class AddAdvancesSerializer(serializers.ModelSerializer):
         return advances
         
         
-
+class CustomerCartSerializer(serializers.ModelSerializer):
+    product = ProductPropSerializer()
+    
+    class Meta:
+        model = Cart
+        fields = '__all__'
         
         
 
 class CustomerSerializer(serializers.ModelSerializer):
+    carts = CustomerCartSerializer(many=True, read_only=True, source='cart_set') 
     class Meta:
         model = Customer
         fields = '__all__'

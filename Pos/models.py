@@ -38,7 +38,8 @@ class StockProperty(models.Model):
     
     
 class ProductSize(models.Model):
-    size = models.DecimalField(max_digits=50, decimal_places=2)
+    size = models.IntegerField(null=True, blank=True)
+    alphabetic_size = models.CharField(max_length=50, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
