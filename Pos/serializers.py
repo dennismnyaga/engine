@@ -367,10 +367,17 @@ class CartCreateSerializer(serializers.ModelSerializer):
         customer_data = validated_data.pop('customer')
         
         customer_phone = customer_data['phone']
-        if Customer.objects.get(phone=customer_phone):
-            customer = Customer.objects.get(phone=customer_phone)
-        else:
+        # if Customer.objects.get(phone=customer_phone):
+        #     customer = Customer.objects.get(phone=customer_phone)
+        # else:
+        #     customer, created = Customer.objects.get_or_create(**customer_data)
+
+        customer = Customer.objects.filter(phone=customer_phone).first()
+
+        if not customer:
+            # Create a new customer if one does not exist
             customer, created = Customer.objects.get_or_create(**customer_data)
+            
         cart = Cart.objects.create(customer=customer, **validated_data)
         return cart
     

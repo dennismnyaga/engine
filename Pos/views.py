@@ -264,6 +264,7 @@ def create_or_update_cart(request):
                 serializer.save()
                 print('response data is ', serializer.data)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            print('errors ', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Cart quantity exceeds product quantity.'}, status=status.HTTP_400_BAD_REQUEST)
