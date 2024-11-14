@@ -547,50 +547,52 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 
-class TaskMaterialSerializer(serializers.ModelSerializer):
+class ProjectMaterialSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TaskMaterial
+        model = ProjectMaterial
         fields = ['material_to_use', 'material_size']
 
 
 class CreateProjectSerializer(serializers.ModelSerializer):
+    materials = ProjectMaterialSerializer(many=True)
     class Meta:
         model = ProjectName
-        fields = '__all__'
-        # fields = ['name', 'product', 'product_size', 'quantity', 'materials']
+        # fields = '__all__'
+        fields = ['name', 'product', 'product_size', 'quantity', 'materials']
+
 
     def create(self, validated_data):
         # Extract materials data from validated data
-        # materials_data = validated_data.pop('materials', [])
+        materials_data = validated_data.pop('materials', [])
 
         # Create the ProjectName instance
         project = ProjectName.objects.create(**validated_data)
 
         # Process each material entry
-        # for material_data in materials_data:
-        #     material = material_data['material_to_use']
-        #     material_size_required = material_data['material_size']
+        for material_data in materials_data:
+            material = material_data['material_to_use']
+            material_size_required = material_data['material_size']
 
-        #     # Check if enough material is available
-        #     if material.total < material_size_required:
-        #         raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
+            # Check if enough material is available
+            if material.total < material_size_required:
+                raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
 
-        #     # Deduct the material size from StockProperty
-        #     material.total -= material_size_required
-        #     material.save()
+            # Deduct the material size from StockProperty
+            material.total -= material_size_required
+            material.save()
 
-        #     # Create a ProjectMaterial instance for this material
-        #     ProjectMaterial.objects.create(
-        #         project=project,
-        #         material_to_use=material,
-        #         material_size=material_size_required
-        #     )
+            # Create a ProjectMaterial instance for this material
+            ProjectMaterial.objects.create(
+                project=project,
+                material_to_use=material,
+                material_size=material_size_required
+            )
 
         return project
     
 
 class CreateTaskSerializer(serializers.ModelSerializer):
-    materials = TaskMaterialSerializer(many=True)
+    materials = ProjectMaterialSerializer(many=True)
 
     class Meta:
         model = Task
@@ -606,34 +608,34 @@ class CreateTaskSerializer(serializers.ModelSerializer):
             'completed',
             'date_created',
             'assigned_to',
-            'materials'
+            
     ]
 
     def create(self, validated_data):
-        materials_data = validated_data.pop('materials', [])
+        # materials_data = validated_data.pop('materials', [])
 
         # Create the ProjectName instance
         task = Task.objects.create(**validated_data)
 
          # Process each material entry
-        for material_data in materials_data:
-            material = material_data['material_to_use']
-            material_size_required = material_data['material_size']
+        # for material_data in materials_data:
+        #     material = material_data['material_to_use']
+        #     material_size_required = material_data['material_size']
 
-            # Check if enough material is available
-            if material.total < material_size_required:
-                raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
+        #     # Check if enough material is available
+        #     if material.total < material_size_required:
+        #         raise serializers.ValidationError(f"Not enough material available for {material.material.name}.")
 
-            # Deduct the material size from StockProperty
-            material.total -= material_size_required
-            material.save()
+        #     # Deduct the material size from StockProperty
+        #     material.total -= material_size_required
+        #     material.save()
 
-            # Create a ProjectMaterial instance for this material
-            TaskMaterial.objects.create(
-                task=task,
-                material_to_use=material,
-                material_size=material_size_required
-                )
+        #     # Create a ProjectMaterial instance for this material
+        #     ProjectMaterial.objects.create(
+        #         task=task,
+        #         material_to_use=material,
+        #         material_size=material_size_required
+        #         )
             
         return task
     
