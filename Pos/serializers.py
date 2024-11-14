@@ -540,10 +540,8 @@ class SalesAnalysisSerializer(serializers.ModelSerializer):
 
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProjectName
-        fields = '__all__'
+
+
 
 
 
@@ -553,6 +551,13 @@ class ProjectMaterialSerializer(serializers.ModelSerializer):
         fields = ['material_to_use', 'material_size']
 
 
+class ProjectSerializer(serializers.ModelSerializer):
+    materials = ProjectMaterialSerializer(many=True, read_only=True)
+    class Meta:
+        model = ProjectName
+        fields = '__all__'
+   
+        
 class CreateProjectSerializer(serializers.ModelSerializer):
     materials = ProjectMaterialSerializer(many=True)
     class Meta:
