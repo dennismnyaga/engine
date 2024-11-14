@@ -192,7 +192,7 @@ def all_cart(request):
 
 @api_view(['POST', 'GET'])
 def all_customers(request):
-    customer = Customer.objects.all()
+    customer = Customer.objects.order_by("-date_added")
     serialize = CustomerSerializer(customer, many=True)
     return Response(serialize.data)
 

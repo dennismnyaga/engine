@@ -108,7 +108,7 @@ class ProductPropUpdateSerializer(serializers.ModelSerializer):
         size_data = validated_data.pop('size', None)
         if size_data:
             size_id = size_data.get('id', None)
-            size_value = size_data.get('size', '').strip()
+            size_value = size_data.get('size', '')
             if size_id:
                 size = ProductSize.objects.get(pk=size_id)
             elif size_value:
