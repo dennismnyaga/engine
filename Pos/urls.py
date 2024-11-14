@@ -58,7 +58,7 @@ urlpatterns = [
     path('quantity-complete/<str:pk>/', views.task_completion.as_view(), name='task-complete'),
     path('addAdvance/', views.create_advances, name='add-advances'),
     path('updateAdvances/<str:pk>/', views.updateAdvances.as_view()),
-    path('deleteadvance/<str:pk>/', views.delete_advance, name='delete-advance'),
+    path('deleteadvacrence/<str:pk>/', views.delete_advance, name='delete-advance'),
     path('deletetask/<str:pk>/', views.delete_task, name='delete-task'),
     # path('update-task/<str:pk>/', views.update_task, name='update-task'),
     path('allprojects', views.GetAllProjects.as_view())

@@ -597,7 +597,7 @@ class CreateProjectSerializer(serializers.ModelSerializer):
     
 
 class CreateTaskSerializer(serializers.ModelSerializer):
-    materials = ProjectMaterialSerializer(many=True)
+    # materials = ProjectMaterialSerializer(many=True)
 
     class Meta:
         model = Task
