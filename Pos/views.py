@@ -157,7 +157,7 @@ def all_productsize(request):
 
 @api_view(['POST', 'GET'])
 def all_emplyees(request):
-    employee = Employees.objects.all()
+    employee = Employees.objects.order_by('-date_added')
     serialize = EmployeeSerializer(employee, many=True)
     return Response(serialize.data)
 
