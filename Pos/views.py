@@ -122,10 +122,26 @@ class CreateProjectView(APIView):
         print('This is the data ', request.data)
         serializer = CreateProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()  # This calls the create method of the serializer
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            project = serializer.save()  # This creates the project and saves it
+            print('Project created: ', project)
+
+            # Serialize the project instance to include nested materials
+            response_serializer = CreateProjectSerializer(project)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
         print('This is the error ', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class CreateProjectView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         print('This is the data ', request.data)
+#         serializer = CreateProjectSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()  # This calls the create method of the serializer
+#             print('jj ', serializer.data)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         print('This is the error ', serializer.errors)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetAllProjects(APIView):

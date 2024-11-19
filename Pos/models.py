@@ -38,12 +38,13 @@ class StockProperty(models.Model):
     
     
 class ProductSize(models.Model):
-    size = models.IntegerField(null=True, blank=True)
+    size = models.CharField(max_length=50, null=True, blank=True)
+    # size = models.IntegerField(null=True, blank=True)
     alphabetic_size = models.CharField(max_length=50, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self):
-        return self.size
+    # def __str__(self):
+    #     return self.size
     
   
 class Product(models.Model):
@@ -148,8 +149,6 @@ class Expenses(models.Model):
 
 class ProjectName(models.Model):
     name = models.CharField(max_length=1000)
-    # material_to_use = models.ForeignKey(StockProperty, on_delete=models.CASCADE)
-    # material_size = models.DecimalField(decimal_places=2, max_digits=10)
     product = models.CharField(max_length=200)
     product_size = models.DecimalField(decimal_places=2, max_digits=10)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -162,7 +161,7 @@ class ProjectName(models.Model):
 
 
 class Task(models.Model):
-    project = models.ForeignKey(ProjectName, on_delete=models.CASCADE)
+    project = models.ForeignKey(ProjectName, on_delete=models.CASCADE, related_name='project')
     task_name = models.TextField()
     estimated_pay = models.DecimalField(decimal_places=2, max_digits=10)
     quantity = models.IntegerField()

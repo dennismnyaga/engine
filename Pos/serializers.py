@@ -238,14 +238,20 @@ class StockPropUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockProperty
         fields = '__all__'
-            
+
+class ProjectManagementSerializers(serializers.ModelSerializer):
+  
+    class Meta:
+        model = ProjectName
+        fields = '__all__'             
 
 class TaskManagementSerializers(serializers.ModelSerializer):
-    # project = ProjectSerializer()
-    # assigned_to = EmployeeSerializer()
+    project = ProjectManagementSerializers()
     class Meta:
         model = Task
         fields = '__all__'       
+
+     
 
 
 class AdvancesSerializers(serializers.ModelSerializer):
@@ -265,6 +271,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def get_tasks(self, obj):
         tasks = obj.tasks.all()
         return TaskManagementSerializers(tasks, many = True).data
+    
     
     def get_advances(self, obj):
         advances = obj.advances.all()
@@ -559,7 +566,7 @@ class ProjectSerializer(serializers.ModelSerializer):
    
         
 class CreateProjectSerializer(serializers.ModelSerializer):
-    materials = ProjectMaterialSerializer(many=True)
+    materials = ProjectMaterialSerializer(many=True, read_only=True)
     class Meta:
         model = ProjectName
         # fields = '__all__'
